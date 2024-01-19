@@ -4,13 +4,16 @@
  */
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_DXT_IMPLEMENTATION
 
 #include <reshade.hpp>
 #include "config.hpp"
 #include "crc32_hash.hpp"
+#include "stb_dxt.h"
 #include <vector>
 #include <filesystem>
 #include <stb_image.h>
+#include <sstream>
 
 using namespace reshade::api;
 
@@ -137,9 +140,40 @@ bool load_texture_image(const resource_desc &desc, subresource_data &data, std::
 		data.row_pitch = width * 4;
 		data.slice_pitch = data.row_pitch * height;
 		break;
+	case format::bc1_typeless:
+	case format::bc1_unorm:
+	case format::bc1_unorm_srgb:
+		{
+			unsigned char * srcData = (unsigned char *)pixel_data.data();
+			unsigned char * dstData = (unsigned char *)pixel_data.data();
+
+			rygCompress(dstData, srcData, width, height, 0);
+
+			data.data = (uint8_t *const)dstData;
+			data.row_pitch = width * 4;
+			data.slice_pitch = data.row_pitch * height;
+			break;
+		}
+	case format::bc3_typeless:
+	case format::bc3_unorm:
+	case format::bc3_unorm_srgb:
+		{
+			unsigned char * srcData = (unsigned char *)pixel_data.data();
+			unsigned char * dstData = (unsigned char *)pixel_data.data();
+
+			rygCompress(dstData, srcData, width, height, 1);
+
+			data.data = (uint8_t *const)dstData;
+			data.row_pitch = width * 4;
+			data.slice_pitch = data.row_pitch * height;
+			break;
+		}
 	default:
 		// Unsupported format
-		reshade::log_message(reshade::log_level::error, "Failed to replace texture data because format is not supported!");
+		// Check the enums at "include/reshade_api_format.hpp"
+		std::stringstream s;
+		s << "Failed to replace texture. Format with enum " << static_cast<uint32_t>(desc.texture.format) << " is unsupported!";
+		reshade::log_message(reshade::log_level::error, s.str().c_str());
 		return false;
 	}
 
