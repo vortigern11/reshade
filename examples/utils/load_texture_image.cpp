@@ -150,7 +150,7 @@ bool load_texture_image(const resource_desc &desc, subresource_data &data, std::
 			rygCompress(dstData, srcData, width, height, 0);
 
 			data.data = (uint8_t *const)dstData;
-			data.row_pitch = width * 4;
+			data.row_pitch = 8 * ((width + 3) / 4);
 			data.slice_pitch = data.row_pitch * height;
 			break;
 		}
@@ -164,7 +164,7 @@ bool load_texture_image(const resource_desc &desc, subresource_data &data, std::
 			rygCompress(dstData, srcData, width, height, 1);
 
 			data.data = (uint8_t *const)dstData;
-			data.row_pitch = width * 4;
+			data.row_pitch = 16 * ((width + 3) / 4);
 			data.slice_pitch = data.row_pitch * height;
 			break;
 		}
