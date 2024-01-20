@@ -65,7 +65,11 @@ bool load_texture_image(const resource_desc &desc, subresource_data &data, std::
 	if (desc.texture.width != static_cast<uint32_t>(width) ||
 		desc.texture.height != static_cast<uint32_t>(height))
 	{
-		reshade::log_message(reshade::log_level::error, "Failed to replace texture data because dimensions do not match!");
+		std::stringstream s;
+		s << "Failed to replace texture " << replace_path.u8string() << " . ";
+		s << "Expected dimensions " << desc.texture.width << "x" << desc.texture.height;
+		s << ", but got " << static_cast<uint32_t>(width) << "x" << static_cast<uint32_t>(width) << "!";
+		reshade::log_message(reshade::log_level::error, s.str().c_str());
 		return false;
 	}
 
@@ -172,7 +176,7 @@ bool load_texture_image(const resource_desc &desc, subresource_data &data, std::
 		// Unsupported format
 		// Check the enums at "include/reshade_api_format.hpp"
 		std::stringstream s;
-		s << "Failed to replace texture. Format with enum " << static_cast<uint32_t>(desc.texture.format) << " is unsupported!";
+		s << "Failed to replace texture " << replace_path.u8string() << " . Format with enum " << static_cast<uint32_t>(desc.texture.format) << " is unsupported!";
 		reshade::log_message(reshade::log_level::error, s.str().c_str());
 		return false;
 	}
